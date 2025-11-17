@@ -70,7 +70,7 @@ grade_prompt = ChatPromptTemplate.from_messages(
 )
 
 retrieval_grader = grade_prompt | structured_llm_grader
-question = "How to create a Small & Light Inventory Report?"  
+question = "Creating a removal order"  
 docs = retriever.invoke(question)
 
 # Check the first (most relevant) document 
@@ -286,6 +286,8 @@ def decide_to_generate(state):
 workflow = StateGraph(GraphState)
 
 #Define nodes
+#Nodes in langGraph are stateless functions that take in the current state and return an updated state
+# The first parameter is the node name, the second is the function
 workflow.add_node("retrieve",retrieve) #Retrieve documents
 workflow.add_node("grade_documents",grade_documents) #Grade documents
 workflow.add_node("transform_query",transform_query) #Re-write question
@@ -293,7 +295,11 @@ workflow.add_node("web_search",web_search) #Web search
 workflow.add_node("generate",generate) #Generate answer
 
 #Build graph
-
+#Define edges
+#Edges in langGraph define the flow between nodes
+# The first parameter is the from node, the second is the to node
+# Conditional edges allow for branching based on a decision function
+#In this case, after grading documents, we either transform the query or generate an answer based on relevance
 workflow.add_edge(START, "retrieve")
 workflow.add_edge("retrieve", "grade_documents")
 workflow.add_conditional_edges(
